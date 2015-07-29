@@ -1,0 +1,11 @@
+--- origsrc/marisa-0.2.4/lib/Makefile.am	2013-01-22 20:35:40.000000000 -0600
++++ src/marisa-0.2.4/lib/Makefile.am	2015-07-24 16:39:11.203051200 -0500
+@@ -14,6 +14,8 @@ libmarisa_la_SOURCES = \
+   marisa/grimoire/trie/tail.cc \
+   marisa/grimoire/trie/louds-trie.cc
+ 
++libmarisa_la_LDFLAGS = -no-undefined
++
+ include_HEADERS = marisa.h
+ 
+ libmarisa_includedir = ${includedir}/marisa

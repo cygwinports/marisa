@@ -1,0 +1,80 @@
+inherit perl python-distutils python3-distutils ruby
+
+NAME="marisa"
+VERSION=0.2.4
+RELEASE=1
+CATEGORY="Libs"
+SUMMARY="Trie data structure library"
+DESCRIPTION="Matching Algorithm with Recursively Implemented StorAge (MARISA)
+is a static and space-efficient trie data structure. And libmarisa is a C++
+library to provide an implementation of MARISA. Also, the package contains a
+set of command line tools for building and operating a MARISA-based dictionary."
+HOMEPAGE="https://code.google.com/p/marisa-trie/"
+SRC_URI="https://marisa-trie.googlecode.com/files/marisa-${VERSION}.tar.gz"
+PATCH_URI="0.2.4-no-undefined.patch"
+
+PKG_NAMES="libmarisa0 libmarisa-devel marisa-tools
+           perl-marisa python-marisa python3-marisa ruby-marisa"
+libmarisa0_CONTENTS="usr/bin/cygmarisa-0.dll"
+libmarisa_devel_CONTENTS="usr/include/marisa* usr/lib/libmarisa.dll.a usr/lib/pkgconfig/marisa.pc"
+marisa_tools_CATEGORY="Utils"
+marisa_tools_SUMMARY=${SUMMARY/library/tools}
+marisa_tools_CONTENTS="usr/bin/marisa-* usr/share/doc/"
+perl_marisa_CATEGORY="Perl"
+perl_marisa_CONTENTS="--exclude=sample.pl ${PERL_VENDORARCH#/}/"
+python_marisa_CATEGORY="Python"
+python_marisa_CONTENTS=${PYTHON_SITELIB#/}
+python3_marisa_CATEGORY="Python"
+python3_marisa_CONTENTS=${PYTHON3_SITELIB#/}
+ruby_marisa_CATEGORY="Ruby"
+ruby_marisa_CONTENTS=${RUBY_VENDORARCH#/}
+
+DIFF_EXCLUDES="marisa.pm marisa.py"
+
+src_compile() {
+	cd ${S}
+	cygautoreconf
+	cd ${B}
+	cygconf
+	cygmake
+
+	mkdir -p bindings
+	lndirs ${S}/bindings ${B}/bindings
+
+	pushd bindings
+	cygmake -j1 swig-{perl,python,ruby}
+	popd
+
+	pushd bindings/perl
+	perl_compile INC="-I${S}/lib" LIBS="-L${B}/lib/.libs -lmarisa"
+	popd
+
+	pushd bindings/python
+	${PYTHON} setup.py build_ext --include-dirs="${S}/lib" --library-dirs="${B}/lib/.libs"
+	python_distutils_compile
+	${PYTHON3} setup.py build_ext --include-dirs="${S}/lib" --library-dirs="${B}/lib/.libs"
+	python3_distutils_compile
+	popd
+
+	pushd bindings/ruby
+	ruby_ext_compile --with-opt-include="${S}/lib" --with-opt-lib="${B}/lib/.libs"
+	popd
+}
+
+src_install() {
+	cd ${B}
+	cyginstall
+
+	pushd bindings/perl
+	perl_install
+	popd
+
+	pushd bindings/python
+	python_distutils_install
+	python3_distutils_install
+	popd
+
+	pushd bindings/ruby
+	ruby_install
+	popd
+}
