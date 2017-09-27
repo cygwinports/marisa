@@ -2,7 +2,7 @@ inherit perl python2-distutils python3-distutils ruby
 
 NAME="marisa"
 VERSION=0.2.4
-RELEASE=2
+RELEASE=3
 CATEGORY="Libs"
 SUMMARY="Trie data structure library"
 DESCRIPTION="Matching Algorithm with Recursively Implemented StorAge (MARISA)
